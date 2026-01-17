@@ -1,0 +1,162 @@
+name: payments-processor
+
+x-app-common-dev: &app-common-dev
+  build:
+    context: .
+    dockerfile: docker/php/Dockerfile
+    target: dev
+  working_dir: /var/www/html
+  depends_on:
+    redis:
+      condition: service_started
+  networks:
+    - appnet
+
+x-app-common-prod: &app-common-prod
+  build:
+    context: .
+    dockerfile: docker/php/Dockerfile
+    target: prod
+  working_dir: /var/www/html
+  depends_on:
+    redis:
+      condition: service_started
+  networks:
+    - appnet   
+
+services:
+  # Laravel API
+  app-dev:
+    <<: *app-common-dev
+    profiles: ["local"]
+    volumes:
+      - ./:/var/www/html
+    ports:
+      - "8080:80"
+    env_file:
+      - ${ENV_FILE:-.env.local}
+
+  # Queue worker
+  horizon:
+    user: "${UID:-1000}:${GID:-1000}"
+    profiles: ["local"]
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      target: dev
+    volumes:
+      - ./:/var/www/html
+    env_file:
+      - ${ENV_FILE:-.env.local}
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep -v grep | grep -q 'artisan horizon'"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    depends_on:
+      - redis
+    networks:
+      - appnet
+    command: ["php", "artisan", "horizon"]
+    restart: unless-stopped
+
+  scheduler-dev:
+    <<: *app-common-dev
+    user: "${UID:-1000}:${GID:-1000}"
+    profiles: ["local"]
+    volumes:
+      - ./:/var/www/html
+    env_file:
+      - ${ENV_FILE:-.env.local}
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep -v grep | grep -q 'artisan schedule:work'"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    command: ["php", "artisan", "schedule:work"]
+
+  app-staging:
+    <<: *app-common-prod
+    profiles: ["staging"]
+    ports:
+      - "8080:80"
+    env_file:
+      - ${ENV_FILE:-.env.local}
+
+  queue-staging:
+    <<: *app-common-prod
+    profiles: ["staging"]
+    volumes:
+      - ./:/var/www/html
+    env_file:
+      - ${ENV_FILE:-.env.local}
+    command: ["php", "artisan", "queue:work", "sqs", "--sleep=1", "--tries=3", "--timeout=120", "--max-time=3600", "--backoff=5"]
+
+  # Scheduler
+  scheduler-staging:
+    <<: *app-common-prod
+    profiles: ["staging"]
+    volumes:
+      - ./:/var/www/html
+    env_file:
+      - ${ENV_FILE:-.env.local}
+    command: ["php", "artisan", "schedule:work"]
+
+  # MySQL (profile=local)
+  db-dev:
+    profiles: ["local"]
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: payments_processor
+      MYSQL_USER: payments_api
+      MYSQL_PASSWORD: payments!@#
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - appnet
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  # Redis (cache + queue in local)
+  redis:
+    profiles: ["local"]
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    networks:
+      - appnet
+
+  # Production
+  app-prod:
+    <<: *app-common-prod
+    profiles: ["prod"]
+    ports:
+      - "8080:80"
+    env_file:
+      - ${ENV_FILE:-.env.prod}
+
+  queue-prod:
+    <<: *app-common-prod
+    profiles: ["prod"]
+    env_file:
+      - ${ENV_FILE:-.env.prod}
+    command: ["php", "artisan", "queue:work", "sqs", "--sleep=1", "--tries=3", "--timeout=120", "--max-time=3600", "--backoff=5"]
+
+  scheduler-prod:
+    <<: *app-common-prod
+    profiles: ["prod"]
+    env_file:
+      - ${ENV_FILE:-.env.prod}
+    command: ["php", "artisan", "schedule:work"]
+
+networks:
+  appnet:
+
+volumes:
+  dbdata:
