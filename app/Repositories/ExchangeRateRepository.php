@@ -4,8 +4,8 @@ namespace App\Repositories;
 
 use App\Models\ExchangeRate;
 use Illuminate\Support\Facades\Cache;
-use App\Repositories\ExchangeRateRepositoryInterface;
 use App\Exchange\Contracts\ExchangeRateProviderInterface;
+use App\Repositories\Contracts\ExchangeRateRepositoryInterface;
 
 class ExchangeRateRepository implements ExchangeRateRepositoryInterface
 {

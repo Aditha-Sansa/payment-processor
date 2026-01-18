@@ -6,9 +6,10 @@ use Illuminate\Support\ServiceProvider;
 use App\Repositories\ExchangeRateRepository;
 use App\Repositories\PaymentImportRepository;
 use App\Exchange\Providers\FrankfurterProvider;
-use App\Repositories\ExchangeRateRepositoryInterface;
 use App\Exchange\Contracts\ExchangeRateProviderInterface;
+use App\Repositories\Contracts\ExchangeRateRepositoryInterface;
 use App\Repositories\Contracts\PaymentImportRepositoryInterface;
+
 
 class PaymentProcessingServiceProvider extends ServiceProvider
 {
