@@ -31,10 +31,13 @@ services:
     profiles: ["local"]
     volumes:
       - ./:/var/www/html
+      - composer_cache:/tmp/composer-cache 
     ports:
       - "8080:8080"
     env_file:
       - ${ENV_FILE:-.env.local}
+    environment:
+      COMPOSER_CACHE_DIR: /tmp/composer-cache
 
   # Queue worker
   horizon:
@@ -160,3 +163,4 @@ networks:
 
 volumes:
   dbdata:
+  composer_cache:
