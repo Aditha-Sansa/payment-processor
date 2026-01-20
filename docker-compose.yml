@@ -41,7 +41,6 @@ services:
 
   # Queue worker
   horizon:
-    user: "${UID:-1000}:${GID:-1000}"
     profiles: ["local"]
     build:
       context: .
@@ -65,7 +64,6 @@ services:
 
   scheduler-dev:
     <<: *app-common-dev
-    user: "${UID:-1000}:${GID:-1000}"
     profiles: ["local"]
     volumes:
       - ./:/var/www/html

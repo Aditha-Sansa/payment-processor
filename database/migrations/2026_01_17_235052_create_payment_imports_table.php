@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('payment_imports', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->uuid('import_id');
+            $table->uuid('public_id')->unique();
 
             $table->string('original_filename');
             $table->string('source_disk');

@@ -21,5 +21,6 @@ return [
         'provider' => env('EXCHANGE_PROVIDER', 'frankfurter'),
         'base' => env('EXCHANGE_BASE', 'USD'),
         'cache_ttl_seconds' => (int) env('EXCHANGE_CACHE_TTL', 3600),
+        'exchange_rate_com_key' => env('EXCHANGERATE_API_COM_KEY', ''),
     ],
 ];

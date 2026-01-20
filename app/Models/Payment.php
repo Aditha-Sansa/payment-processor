@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Payment extends Model
 {
     protected $fillable = [
+        'public_id',
         'payment_import_id',
         'row_number',
         'customer_id',
@@ -18,5 +19,9 @@ class Payment extends Model
         'usd_amount',
         'exchange_rate',
         'paid_at',
+    ];
+
+    protected $casts = [
+        'paid_at' => 'datetime',
     ];
 }

@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,9 +12,12 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->uuid('public_id')->unique();
 
-            $table->foreignId('payment_import_id')->constrained('payment_imports')->onDelete('cascade');
-            $table->unsignedBigInteger('row_number')->nullable()->index(); 
+            $table->unsignedBigInteger('payment_import_id')->index();
+            $table->foreign('payment_import_id')->references('id')->on('payment_imports')->cascadeOnDelete();
+
+            $table->unsignedBigInteger('row_number')->nullable()->index();
 
             $table->string('customer_id', 64)->index();
             $table->string('customer_name', 255);
@@ -23,11 +25,11 @@ return new class extends Migration
 
             $table->string('reference_no', 64)->index();
 
-            $table->decimal('original_amount', 18, 6);
+            $table->decimal('original_amount', 19, 4);
             $table->char('currency', 3)->index();
 
-            $table->decimal('usd_amount', 18, 6);
-            $table->decimal('exchange_rate', 18, 10);
+            $table->decimal('usd_amount', 19, 4);
+            $table->decimal('exchange_rate', 19, 4);
 
             $table->dateTime('paid_at')->nullable()->index();
 

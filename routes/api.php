@@ -10,4 +10,5 @@ use App\Http\Controllers\PaymentImportController;
 
 Route::prefix('v1')->group(function () {
     Route::post('/payment-imports', [PaymentImportController::class, 'store']);
+    Route::get('/payment-imports/{publicId}', [PaymentImportController::class, 'show']);
 });

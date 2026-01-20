@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class PaymentImport extends Model
 {
     protected $fillable = [
-        'import_id',
+        'public_id',
         'original_filename',
         'source_disk',
         'source_path',
@@ -19,5 +19,11 @@ class PaymentImport extends Model
         'started_at',
         'completed_at',
         'meta',
+    ];
+
+    protected $casts = [
+        'meta' => 'array',
+        'started_at' => 'datetime',
+        'completed_at' => 'datetime',
     ];
 }
