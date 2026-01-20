@@ -38,6 +38,9 @@ services:
       - ${ENV_FILE:-.env.local}
     environment:
       COMPOSER_CACHE_DIR: /tmp/composer-cache
+      NGINX_CLIENT_MAX_BODY_SIZE: 250M
+      PHP_POST_MAX_SIZE: 250M
+      PHP_UPLOAD_MAX_FILE_SIZE: 250M
 
   # Queue worker
   horizon:

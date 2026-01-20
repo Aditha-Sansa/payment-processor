@@ -15,7 +15,7 @@ class ProcessPaymentChunkJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Batchable;
 
-    public int $timeout = 120;
+    public int $timeout = 300;
     public int $tries = 3;
     public int $backoff = 10;
 

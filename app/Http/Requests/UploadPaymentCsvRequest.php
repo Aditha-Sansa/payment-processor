@@ -22,7 +22,7 @@ class UploadPaymentCsvRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file' => ['required', 'file', 'mimetypes:text/plain,text/csv', 'mimes:csv,txt', 'max:20480'],
+            'file' => ['required', 'file', 'mimetypes:text/plain,text/csv', 'mimes:csv,txt', 'max:153600'], // max 150MB
         ];
     }
 }

@@ -44,7 +44,7 @@ class CsvChunkerService
         $startLine = 2; // the header of csv fileis line 1
 
         $openNewChunk = function () use (&$currentTmp, &$currentPath, &$currentCount, &$chunkIndex, $workDisk, $importPublicId, $header, &$startLine, $totalRows) {
-            $currentTmp = fopen('php://temp', 'w+');
+            $currentTmp = fopen('php://temp/maxmemory:5242880', 'w+'); //t his will keep things in memory up to 5MB and thn offload it to the disk
             if (!is_resource($currentTmp)) {
                 throw new RuntimeException('Failed to create temp stream for chunk.');
             }

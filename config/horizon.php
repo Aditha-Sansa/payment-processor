@@ -205,7 +205,7 @@ return [
             'maxProcesses' => 1,
             'maxTime' => 0,
             'maxJobs' => 0,
-            'memory' => 128,
+            'memory' => 512,
             'tries' => 1,
             'timeout' => 60,
             'nice' => 0,
@@ -215,7 +215,7 @@ return [
     'environments' => [
         'production' => [
             'supervisor-1' => [
-                'queue' => [env('PAYMENTS_QUEUE_CHUNKING', 'imports'), env('PAYMENTS_QUEUE_PROCESSING', 'imports')],
+                'queue' => [env('PAYMENTS_QUEUE_CHUNKING', 'imports'), env('PAYMENTS_QUEUE_PROCESSING', 'processing')],
                 'maxProcesses' => 10,
                 'balanceMaxShift' => 1,
                 'balanceCooldown' => 3,
@@ -224,8 +224,10 @@ return [
 
         'local' => [
             'supervisor-1' => [
-                'queue' => [env('PAYMENTS_QUEUE_CHUNKING', 'imports'), env('PAYMENTS_QUEUE_PROCESSING', 'imports')],
-                'maxProcesses' => 3,
+                'queue' => [env('PAYMENTS_QUEUE_CHUNKING', 'imports'), env('PAYMENTS_QUEUE_PROCESSING', 'processing')],
+                'maxProcesses' => 4,
+                'memory' => 512,
+                'timeout' => 900,
             ],
         ],
     ],
