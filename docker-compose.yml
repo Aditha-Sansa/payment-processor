@@ -44,7 +44,7 @@ services:
 
   # Queue worker
   horizon:
-    profiles: ["local", "prod"]
+    profiles: ["local"]
     build:
       context: .
       dockerfile: docker/php/Dockerfile
@@ -116,24 +116,52 @@ services:
     ports:
       - "80:8080"
     env_file:
-      - ${ENV_FILE:-.env.prod}
+      - ${ENV_FILE:-.env.production}
     environment:
       NGINX_CLIENT_MAX_BODY_SIZE: 250M
       PHP_POST_MAX_SIZE: 250M
       PHP_UPLOAD_MAX_FILE_SIZE: 250M
 
-  queue-prod:
+  queue-chunk-prod:
+    <<: *app-common-prod
+    profiles: ["prod"]
+    env_file:
+      - ${ENV_FILE:-.env.production}
+    command: ["php", "artisan", "queue:work", "sqs",  
+              "--queue=payments-import",
+              "--sleep=1", 
+              "--tries=3", 
+              "--timeout=900", 
+              "--memory=512", 
+              "--max-time=3600", 
+              "--backoff=5"]
+    restart: unless-stopped
+
+  queue-processing-prod:
     <<: *app-common-prod
     profiles: ["prod"]
     env_file:
       - ${ENV_FILE:-.env.prod}
-    command: ["php", "artisan", "queue:work", "sqs", "--sleep=1", "--tries=3", "--timeout=120", "--max-time=3600", "--backoff=5"]
+    command: ["php", "artisan", "queue:work", "sqs",
+              "--queue=payments-processor",
+              "--sleep=1",
+              "--tries=3",
+              "--timeout=900",
+              "--memory=512",
+              "--max-time=3600",
+              "--backoff=5"]
+    restart: unless-stopped
 
   scheduler-prod:
     <<: *app-common-prod
     profiles: ["prod"]
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep -v grep | grep -q 'artisan schedule:work'"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
     env_file:
-      - ${ENV_FILE:-.env.prod}
+      - ${ENV_FILE:-.env.production}
     command: ["php", "artisan", "schedule:work"]
 
 networks:
