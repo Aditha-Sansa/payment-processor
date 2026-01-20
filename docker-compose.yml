@@ -44,7 +44,7 @@ services:
 
   # Queue worker
   horizon:
-    profiles: ["local"]
+    profiles: ["local", "prod"]
     build:
       context: .
       dockerfile: docker/php/Dockerfile
@@ -79,33 +79,6 @@ services:
       retries: 5
     command: ["php", "artisan", "schedule:work"]
 
-  app-staging:
-    <<: *app-common-prod
-    profiles: ["staging"]
-    ports:
-      - "8080:80"
-    env_file:
-      - ${ENV_FILE:-.env.local}
-
-  queue-staging:
-    <<: *app-common-prod
-    profiles: ["staging"]
-    volumes:
-      - ./:/var/www/html
-    env_file:
-      - ${ENV_FILE:-.env.local}
-    command: ["php", "artisan", "queue:work", "sqs", "--sleep=1", "--tries=3", "--timeout=120", "--max-time=3600", "--backoff=5"]
-
-  # Scheduler
-  scheduler-staging:
-    <<: *app-common-prod
-    profiles: ["staging"]
-    volumes:
-      - ./:/var/www/html
-    env_file:
-      - ${ENV_FILE:-.env.local}
-    command: ["php", "artisan", "schedule:work"]
-
   # MySQL (profile=local)
   db-dev:
     profiles: ["local"]
@@ -129,7 +102,7 @@ services:
 
   # Redis (cache + queue in local)
   redis:
-    profiles: ["local"]
+    profiles: ["local", "prod"]
     image: redis:7-alpine
     ports:
       - "6380:6379"
@@ -141,9 +114,13 @@ services:
     <<: *app-common-prod
     profiles: ["prod"]
     ports:
-      - "8080:80"
+      - "80:8080"
     env_file:
       - ${ENV_FILE:-.env.prod}
+    environment:
+      NGINX_CLIENT_MAX_BODY_SIZE: 250M
+      PHP_POST_MAX_SIZE: 250M
+      PHP_UPLOAD_MAX_FILE_SIZE: 250M
 
   queue-prod:
     <<: *app-common-prod
