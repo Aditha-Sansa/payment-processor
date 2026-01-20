@@ -31,6 +31,8 @@ class PaymentRowValidatorService
         $reference = trim((string) ($rowAssoc['reference_no'] ?? ''));
         if ($reference === '' || strlen($reference) > 64) {
             $errors[] = 'Invalid reference_no';
+        } elseif (!preg_match('/\A[A-Z0-9_-]+\z/i', $reference)) {
+            $errors[] = 'reference_no contains invalid characters!';
         }
 
         $paidAtRaw = trim((string) ($rowAssoc['date_time'] ?? ''));
