@@ -141,7 +141,7 @@ services:
     <<: *app-common-prod
     profiles: ["prod"]
     env_file:
-      - ${ENV_FILE:-.env.prod}
+      - ${ENV_FILE:-.env.production}
     command: ["php", "artisan", "queue:work", "sqs",
               "--queue=payments-processor",
               "--sleep=1",
